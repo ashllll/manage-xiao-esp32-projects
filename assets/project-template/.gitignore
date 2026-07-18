@@ -1,0 +1,18 @@
+# Reasonix 会话元数据（本机）
+.reasonix/
+
+# PlatformIO 构建产物（含按环境生成的 sdkconfig）
+.pio/
+
+# 文档站
+.venv/
+site/
+
+# ESP-IDF 根目录生成物（防御性忽略；本模板生成于 .pio/ 下）
+sdkconfig
+sdkconfig.old
+
+# 其他
+build/
+.DS_Store
+__pycache__/

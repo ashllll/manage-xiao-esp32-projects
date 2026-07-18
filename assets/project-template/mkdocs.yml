@@ -1,0 +1,63 @@
+site_name: XIAO ESP32 开发文档
+site_description: PlatformIO + ESP-IDF 项目、固件、引脚及外围设备文档
+repo_name: xiao_esp32
+
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - navigation.footer
+    - toc.follow
+    - content.code.copy
+    - content.tabs.link
+    - search.highlight
+    - search.suggest
+
+nav:
+  - 首页: index.md
+  - 快速开始: getting-started.md
+  - 开发流程: workflow.md
+  - 硬件:
+      - XIAO 型号: hardware/boards.md
+      - 引脚定义: hardware/pinout.md
+      - 供电、USB 与电气安全: hardware/power-usb.md
+  - 固件:
+      - 工程结构: firmware/architecture.md
+      - 配置与依赖: firmware/configuration.md
+      - 编译与烧录: firmware/build-flash.md
+      - 固件发布: firmware/release.md
+  - 外围设备:
+      - 集成总览: peripherals/index.md
+      - I²C: peripherals/i2c.md
+      - ADS1115 实战: peripherals/ads1115.md
+      - SPI: peripherals/spi.md
+      - UART: peripherals/uart.md
+      - GPIO、ADC 与 PWM: peripherals/gpio-adc-pwm.md
+  - 无线连接: wireless/index.md
+  - 调试: debugging/index.md
+  - 参考资料:
+      - 资料索引: reference/resources.md
+      - 文档维护: reference/maintenance.md
+
+exclude_docs: |
+  peripherals/_template.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - tables
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
