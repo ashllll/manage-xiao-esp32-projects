@@ -7,6 +7,8 @@
  */
 
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "esp_err.h"
 
@@ -19,6 +21,26 @@ const char *xiao_board_name(void);
 
 /* True when the selected board profile exposes a user LED (S3, C6; not base C3). */
 bool xiao_board_has_user_led(void);
+
+/*
+ * Runtime facts used to verify the selected profile's hardware prerequisites.
+ * A successful validation means the chip family and Flash capacity match the
+ * profile and, for S3, the expected external PSRAM is available to ESP-IDF.
+ */
+typedef struct {
+    uint32_t flash_size_bytes;
+    size_t psram_size_bytes;
+    bool psram_initialized;
+} xiao_board_diagnostics_t;
+
+/*
+ * Validate chip and storage resources against the selected XIAO profile.
+ * Returns ESP_ERR_INVALID_VERSION for a chip-family mismatch,
+ * ESP_ERR_INVALID_SIZE for a Flash/PSRAM capacity mismatch, and
+ * ESP_ERR_INVALID_STATE when required PSRAM is unavailable. The component
+ * logs actual and expected values before returning a validation error.
+ */
+esp_err_t xiao_board_validate(xiao_board_diagnostics_t *diagnostics);
 
 /* Configure the user LED GPIO. Safe to call on boards without a user LED. */
 esp_err_t xiao_board_init(void);

@@ -24,6 +24,16 @@ pio run -e xiao_esp32c3 -t upload
 pio device monitor -b 115200
 ```
 
+把环境名替换为实际板卡。串口出现下面的稳定标志后，说明固件已确认
+芯片系列与 Flash 容量符合所选配置；S3 还会确认 8 MB Octal PSRAM 已初始化：
+
+```text
+XIAO_RUNTIME_READY version=1 board=Seeed Studio XIAO ESP32C3
+heartbeat count=1 uptime_ms=...
+```
+
+如果自检不通过，组件会输出实际值和期望值并中止，不会用错误硬件配置继续运行。该检查验证芯片和内存基线，不用于鉴别板卡厂商或具体扩展板变体。
+
 启动文档站：
 
 ```bash

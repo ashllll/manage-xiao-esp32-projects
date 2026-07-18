@@ -44,8 +44,9 @@ After scaffolding:
 2. Update project-specific pin assignments and peripheral pages.
 3. Identify the framework before adapting examples. The bundled project uses ESP-IDF; do not paste Arduino APIs into it without an explicit Arduino component or framework change.
 4. Keep secrets, Wi-Fi credentials, serial ports, and machine-specific settings out of committed files.
-5. Run structural validation before installing or building dependencies.
-6. Run full firmware and documentation validation when the environment is available.
+5. Preserve the runtime self-test contract: validate the selected board profile before starting product tasks and emit `XIAO_RUNTIME_READY version=1` only after Flash/PSRAM checks pass.
+6. Run structural validation before installing or building dependencies.
+7. Run full firmware and documentation validation when the environment is available.
 
 ## Validate
 
@@ -68,6 +69,7 @@ Require these outcomes:
 - C3, S3, and C6 firmware builds succeed.
 - `mkdocs build --strict` succeeds.
 - On Apple Silicon, PlatformIO reports `darwin_arm64` and both cross-compilers are Mach-O arm64 executables.
+- When a matching board is physically connected and the user explicitly requests flashing, the serial log reports `XIAO_RUNTIME_READY version=1` and at least ten monotonically increasing heartbeats. A successful upload alone is not a runtime acceptance result.
 
 ## Maintain documentation
 
@@ -79,6 +81,7 @@ Require these outcomes:
 - Record every peripheral's power requirements, logic level, wiring, bus settings, SDK source/version, examples, and known conflicts.
 - Prefer Seeed Wiki/GitHub and Espressif documentation over derived notes when facts conflict.
 - Keep XIAO D0–D10 symbolic mappings in `include/xiao_pins.h`; avoid raw GPIO numbers in application code.
+- Document public component APIs, resource ownership, error policy, expected startup logs, and a repeatable real-hardware acceptance procedure. Comments should explain hardware constraints and design intent rather than restating C syntax.
 - When local reference documents are corrected, replaced, or removed, update `references/maintenance.md` and any affected files under `assets/project-template/` in the same task. Then validate the skill, validate the template structurally, and scaffold a temporary project to compare its file inventory with the template.
 
 ## Use official Espressif MCP services

@@ -20,6 +20,9 @@
 #define XIAO_D9 9
 #define XIAO_D10 10
 #define XIAO_USER_LED (-1)
+#define XIAO_EXPECTED_FLASH_BYTES (4U * 1024U * 1024U)
+#define XIAO_EXPECTS_PSRAM 0
+#define XIAO_EXPECTED_PSRAM_BYTES 0U
 
 #elif defined(XIAO_ESP32S3)
 
@@ -36,6 +39,9 @@
 #define XIAO_D9 8
 #define XIAO_D10 9
 #define XIAO_USER_LED 21
+#define XIAO_EXPECTED_FLASH_BYTES (8U * 1024U * 1024U)
+#define XIAO_EXPECTS_PSRAM 1
+#define XIAO_EXPECTED_PSRAM_BYTES (8U * 1024U * 1024U)
 
 #elif defined(XIAO_ESP32C6)
 
@@ -52,6 +58,9 @@
 #define XIAO_D9 20
 #define XIAO_D10 18
 #define XIAO_USER_LED 15
+#define XIAO_EXPECTED_FLASH_BYTES (4U * 1024U * 1024U)
+#define XIAO_EXPECTS_PSRAM 0
+#define XIAO_EXPECTED_PSRAM_BYTES 0U
 
 #else
 #error "Select a supported PlatformIO XIAO environment"
@@ -64,4 +73,3 @@
 #define XIAO_SPI_SCK XIAO_D8
 #define XIAO_SPI_MISO XIAO_D9
 #define XIAO_SPI_MOSI XIAO_D10
-

@@ -63,7 +63,14 @@ pio run -e xiao_esp32c3 -t upload
 pio device monitor -b 115200
 ```
 
-预期日志至少包含板卡名称、Flash 容量、默认 I²C 引脚和每秒一次的 `heartbeat`。C3 基础版没有可由应用控制的用户 LED，因此只有日志心跳。
+预期日志包含编译配置标签、实测 Flash 容量、默认 I²C/UART/SPI 引脚，随后出现：
+
+```text
+I (...) xiao_esp32: XIAO_RUNTIME_READY version=1 board=Seeed Studio XIAO ESP32C3
+I (...) xiao_esp32: heartbeat count=1 uptime_ms=...
+```
+
+`XIAO_RUNTIME_READY` 只会在运行时 Flash/PSRAM 自检通过后输出，适合人工验收和后续串口自动化脚本使用。C3 基础版没有可由应用控制的用户 LED，因此只有日志心跳；S3/C6 同时闪烁用户 LED。
 
 若自动下载失败，按住 BOOT，短按 RESET，松开 BOOT 后重新执行上传。不要把 `/dev/cu.*` 端口写入共享的 `platformio.ini`。
 
@@ -81,9 +88,10 @@ python3 -m venv .venv
 ## 6. 完成检查
 
 - [ ] 目标板环境编译成功。
-- [ ] 串口日志与实际板卡名称一致。
+- [ ] 串口日志中的芯片系列与所选 PlatformIO 环境一致。
 - [ ] Flash 容量为 C3/C6 4 MB 或 S3 8 MB。
-- [ ] S3 构建启用 Octal PSRAM。
+- [ ] 串口出现 `XIAO_RUNTIME_READY version=1`，并持续输出递增的心跳计数。
+- [ ] S3 日志显示 PSRAM 已初始化，而不只是构建配置声称启用。
 - [ ] `mkdocs build --strict` 成功。
 - [ ] 新增外设前已阅读[引脚定义](hardware/pinout.md)和[电气安全](hardware/power-usb.md)。
 

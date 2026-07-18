@@ -14,7 +14,7 @@ sdkconfig.flash-4mb  C3/C6 的 4 MB Flash 配置
 sdkconfig.xiao-esp32s3  S3 的 8 MB Flash 与 Octal PSRAM 配置
 ```
 
-初始固件版本在根目录 `CMakeLists.txt` 中设置为 `0.1.0`，变更记录见 `CHANGELOG.md`。发布新版本时同步更新 `PROJECT_VER`、`CHANGELOG.md` 和 Git Tag。
+固件版本在根目录 `CMakeLists.txt` 中设置，变更记录见 `CHANGELOG.md`。发布新版本时同步更新 `PROJECT_VER`、`CHANGELOG.md` 和 Git Tag。
 
 外围设备驱动建议放入 `components/<device>/`，并复制 `docs/peripherals/_template.md` 建立 `docs/peripherals/<device>.md`。公共 API 放在组件的 `include/` 中。
 
@@ -30,14 +30,16 @@ sequenceDiagram
     App->>HW: 获取芯片和 Flash 信息
     App->>Board: xiao_board_init()
     Board->>HW: 配置用户 LED（若存在）
-    App->>App: 输出板名、容量和默认总线引脚
+    App->>Board: xiao_board_validate()
+    Board->>HW: 校验芯片系列和 Flash；S3 校验 PSRAM
+    App->>App: 输出板名、容量、默认总线引脚和 READY 标志
     loop 每秒
         App->>Board: 切换 LED（若支持）
         App->>App: 输出 heartbeat
     end
 ```
 
-当前 `src/main.c` 是环境自检程序，不是产品业务逻辑。新功能应保留“启动失败可观察”的原则：初始化返回 `esp_err_t`，关键错误带组件 TAG，后台任务有明确的生命周期。
+当前 `src/main.c` 是可烧录的环境自检基线，不是产品业务逻辑。它先验证芯片系列与实际 Flash/PSRAM，再输出 `XIAO_RUNTIME_READY version=1`；失败时组件记录实际值和期望值，随后由 `ESP_ERROR_CHECK` 留下错误和回溯，避免错误配置静默运行。该检查确认运行所需硬件基线，不鉴别板卡厂商或 S3 Sense/Plus 等扩展变体。新功能应保留这种“启动失败可观察”的原则：初始化返回 `esp_err_t`，关键错误带组件 TAG，后台任务有明确的生命周期。
 
 ## 板级支持 API
 
@@ -47,11 +49,14 @@ sequenceDiagram
 |---|---|---|
 | `xiao_board_name()` | 返回编译目标的可读板名 | 不失败 |
 | `xiao_board_has_user_led()` | 判断该板型是否有应用可控用户 LED | 不失败 |
+| `xiao_board_validate(out)` | 读取实际芯片/Flash/PSRAM 并与配置基线核对 | 芯片、容量不符或 S3 PSRAM 未初始化时记录详情并返回错误 |
 | `xiao_board_init()` | 初始化板级资源 | GPIO 错误以 `esp_err_t` 返回 |
 | `xiao_board_led_set(on)` | 设置低电平有效 LED | 无 LED 时返回 `ESP_ERR_NOT_SUPPORTED` |
 | `xiao_board_led_toggle()` | 切换 LED | 无 LED 时返回 `ESP_ERR_NOT_SUPPORTED` |
 
 C3 基础版的 `XIAO_USER_LED` 为 `-1`，因此初始化成功但 LED API 不支持；应用不应把这当成板卡故障。
+
+`xiao_board_diagnostics_t` 保留实测的 Flash、PSRAM 容量与 PSRAM 初始化状态。应用应根据 `xiao_board_validate()` 的返回值决定是否进入业务任务，不要只打印错误后继续运行。
 
 ## 组件设计规则
 
