@@ -24,6 +24,8 @@ pio system info
 
 `pio system info` 的平台应包含 `darwin_arm64`。
 
+推荐让 `~/.platformio/penv/bin` 位于 PATH 前部，避免调用系统 Python 3.9 下的旧入口。`command -v pio` 应指向隔离环境，`pio --version` 应为 6.1.19。
+
 ## 2. 选择开发板
 
 默认是 XIAO ESP32C3。可以使用 `-e` 临时选择目标：
@@ -92,6 +94,7 @@ python3 -m venv .venv
 - [ ] Flash 容量为 C3/C6 4 MB 或 S3 8 MB。
 - [ ] 串口出现 `XIAO_RUNTIME_READY version=1`，并持续输出递增的心跳计数。
 - [ ] S3 日志显示 PSRAM 已初始化，而不只是构建配置声称启用。
+- [ ] 生成配置使用 USB Serial/JTAG 主控制台，D6/D7 未被应用日志占用。
 - [ ] `mkdocs build --strict` 成功。
 - [ ] 新增外设前已阅读[引脚定义](hardware/pinout.md)和[电气安全](hardware/power-usb.md)。
 

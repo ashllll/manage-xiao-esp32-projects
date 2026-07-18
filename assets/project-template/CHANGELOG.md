@@ -5,6 +5,20 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-18
+
+### Added
+
+- 自动真机验收脚本：唯一串口识别、可选显式烧录、READY/内存/连续心跳验证和 JSON 输出。
+- 标准固件交付包：bootloader、分区表、flash 参数、manifest、SHA-256 及 768 KiB 体积门槛。
+- Python 单元测试、Dependabot 和不可变 SHA 固定的 GitHub Actions。
+
+### Changed
+
+- 升级到 PlatformIO Espressif32 7.0.1（官方集成 ESP-IDF 6.0.1），并固定开发与文档依赖。
+- 三种板型使用 USB Serial/JTAG 作为主应用控制台，释放 D6/D7 给业务 UART。
+- 在初始化 LED GPIO 前验证芯片与内存资源；GPIO 写入成功后才更新 LED 软件状态。
+
 ## [0.2.0] - 2026-07-18
 
 ### Added

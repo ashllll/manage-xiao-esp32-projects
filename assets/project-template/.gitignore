@@ -7,6 +7,7 @@
 # 文档站
 .venv/
 site/
+dist/
 
 # ESP-IDF 根目录生成物（防御性忽略；本模板生成于 .pio/ 下）
 sdkconfig

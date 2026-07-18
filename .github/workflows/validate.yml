@@ -1,0 +1,90 @@
+name: Validate Skill
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: skill-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+      - run: python scripts/validate_skill.py
+      - run: python scripts/validate_project.py assets/project-template
+      - name: Verify scaffold inventory
+        run: |
+          target="$RUNNER_TEMP/xiao-scaffold"
+          python scripts/bootstrap_project.py "$target" --name ci_verify --board s3
+          diff \
+            <(cd assets/project-template && find . -type f | sort) \
+            <(cd "$target" && find . -type f | sort)
+
+  template-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: assets/project-template
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: assets/project-template/requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - run: python -m unittest discover -s tests -v
+
+  template-build:
+    needs: [structure, template-tests]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [xiao_esp32c3, xiao_esp32s3, xiao_esp32c6]
+    defaults:
+      run:
+        working-directory: assets/project-template
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: assets/project-template/requirements-dev.txt
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-skill-platformio-${{ hashFiles('assets/project-template/platformio.ini', 'assets/project-template/sdkconfig*') }}
+          restore-keys: |
+            ${{ runner.os }}-skill-platformio-
+      - run: pip install -r requirements-dev.txt
+      - run: pio run -e ${{ matrix.environment }}
+      - run: python scripts/package_firmware.py --environment ${{ matrix.environment }}
+
+  template-docs:
+    needs: structure
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: assets/project-template
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: assets/project-template/requirements-docs.txt
+      - run: pip install -r requirements-docs.txt
+      - run: mkdocs build --strict

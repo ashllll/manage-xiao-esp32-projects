@@ -1,7 +1,7 @@
 interface:
   display_name: "XIAO ESP32 项目工作流"
-  short_description: "跨 Agent 创建、整理并验证 XIAO ESP32 项目"
-  default_prompt: "使用 $manage-xiao-esp32-projects 创建或维护 XIAO ESP32 PlatformIO + ESP-IDF + MkDocs 项目，优先使用 Seeed 与 Espressif 官方来源；如果修改技能本身，只编辑 ~/.agents/skills 下的全局版本并验证所有 Agent 入口。"
+  short_description: "跨 Agent 创建、验收并交付 XIAO ESP32 项目"
+  default_prompt: "使用 $manage-xiao-esp32-projects 创建或维护 XIAO ESP32 PlatformIO + ESP-IDF + MkDocs 项目，优先使用 Seeed 与 Espressif 官方来源，并用可复现构建、固件交付包和明确授权的真机验收验证结果；如果修改技能本身，只编辑 ~/.agents/skills 下的全局版本并验证所有 Agent 入口。"
 
 dependencies:
   tools:

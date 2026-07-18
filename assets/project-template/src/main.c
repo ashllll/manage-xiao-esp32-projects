@@ -17,8 +17,9 @@ void app_main(void)
     xiao_board_diagnostics_t diagnostics;
 
     esp_chip_info(&chip_info);
-    ESP_ERROR_CHECK(xiao_board_init());
+    /* Validate the selected profile before driving any board GPIO. */
     ESP_ERROR_CHECK(xiao_board_validate(&diagnostics));
+    ESP_ERROR_CHECK(xiao_board_init());
 
     ESP_LOGI(TAG, "Board profile: %s", xiao_board_name());
     ESP_LOGI(TAG, "CPU cores: %d, flash: %" PRIu32 " MB",

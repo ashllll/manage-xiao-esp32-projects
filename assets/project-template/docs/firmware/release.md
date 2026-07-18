@@ -17,25 +17,26 @@
 为每个环境单独打包：
 
 ```text
-firmware-<version>-<environment>/
+dist/<environment>/
 ├── firmware.bin
 ├── bootloader.bin
 ├── partition-table.bin
 ├── flash_args
-├── SHA256SUMS
-└── RELEASE_NOTES.md
+├── manifest.json
+└── SHA256SUMS
 ```
 
-不同板型的二进制不可混用。文件名必须包含版本和 PlatformIO 环境名。
+不同板型的二进制不可混用。`manifest.json` 保存项目版本、源码提交、PlatformIO Core/环境、目标芯片、ESP-IDF/编译器版本、大小限制和每个文件的 SHA-256。
 
 ## 生成校验值
 
 ```bash
-cd .pio/build/xiao_esp32c3
-shasum -a 256 firmware.bin bootloader.bin partition_table/partition-table.bin
+python3 scripts/package_firmware.py --environment xiao_esp32c3
+python3 scripts/package_firmware.py --environment xiao_esp32s3
+python3 scripts/package_firmware.py --environment xiao_esp32c6
 ```
 
-把结果写入发布包的 `SHA256SUMS`。校验值证明文件未变化，但不代替代码签名或 Secure Boot。
+脚本会把 ESP-IDF 6 生成的 `partitions.bin` 以稳定的发布名 `partition-table.bin` 复制到包中，并将 `flash_args` 改写为只引用包内扁平文件名，再生成 `manifest.json` 与 `SHA256SUMS`。manifest 同时标记源码提交和工作区是否 dirty；正式交付只应使用已提交的源码。校验值证明文件未变化，但不代替代码签名或 Secure Boot。
 
 ## 烧录信息
 
@@ -68,4 +69,4 @@ shasum -a 256 firmware.bin bootloader.bin partition_table/partition-table.bin
 
 ## CI
 
-`.github/workflows/firmware.yml` 为三个环境构建并上传 `.bin` 与 `flash_args`。CI 产物只能证明构建可复现，不能证明真实外设、电源和射频功能已验证。只有用户明确要求时才创建 GitHub Release 或自动发布固件。
+`.github/workflows/firmware.yml` 为三个环境构建、生成带 manifest 和校验值的完整包，再按环境上传。CI 产物只能证明构建可复现，不能证明真实外设、电源和射频功能已验证。只有用户明确要求时才创建 GitHub Release 或自动发布固件。

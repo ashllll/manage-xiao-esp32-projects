@@ -5,6 +5,7 @@
 - PlatformIO 管理 ESP-IDF、工具链、依赖、编译和烧录。
 - MkDocs Material 管理硬件、固件、引脚及外围设备文档。
 - GitHub Actions 验证全部板卡环境并构建文档站。
+- 自动验收脚本验证真机启动，标准交付包携带版本、SHA-256 和烧录参数。
 
 可选的完整本地资料库由 `XIAO_ESP32_REFERENCE_ROOT` 指定，未设置时默认为 `~/ESP32_资料整理`；本地资料库不存在时不影响固件或文档构建。工程文档的“资料索引”页记录了经过核对的官方入口和本地资料用法。
 
@@ -33,6 +34,15 @@ heartbeat count=1 uptime_ms=...
 ```
 
 如果自检不通过，组件会输出实际值和期望值并中止，不会用错误硬件配置继续运行。该检查验证芯片和内存基线，不用于鉴别板卡厂商或具体扩展板变体。
+
+自动验收当前固件，或显式授权烧录后验收：
+
+```bash
+python3 scripts/verify_hardware.py --environment xiao_esp32s3 --port auto
+python3 scripts/verify_hardware.py --environment xiao_esp32s3 --port auto --flash --json-output
+```
+
+脚本在出现多个 Espressif 串口时拒绝猜测。D6/D7 留给业务 UART；应用日志通过 USB Serial/JTAG 输出，ROM 启动阶段仍可能短暂使用 UART0。
 
 启动文档站：
 
@@ -63,6 +73,13 @@ pio run -e xiao_esp32c3
 pio run -e xiao_esp32s3
 pio run -e xiao_esp32c6
 .venv/bin/mkdocs build --strict
+python3 -m unittest discover -s tests -v
+```
+
+构建后可生成带校验值的交付包：
+
+```bash
+python3 scripts/package_firmware.py --environment xiao_esp32s3
 ```
 
 Apple Silicon 上还应确认 `pio system info` 为 `darwin_arm64`，RISC-V/Xtensa 编译器宿主可执行文件为 Mach-O arm64。

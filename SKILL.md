@@ -45,8 +45,9 @@ After scaffolding:
 3. Identify the framework before adapting examples. The bundled project uses ESP-IDF; do not paste Arduino APIs into it without an explicit Arduino component or framework change.
 4. Keep secrets, Wi-Fi credentials, serial ports, and machine-specific settings out of committed files.
 5. Preserve the runtime self-test contract: validate the selected board profile before starting product tasks and emit `XIAO_RUNTIME_READY version=1` only after Flash/PSRAM checks pass.
-6. Run structural validation before installing or building dependencies.
-7. Run full firmware and documentation validation when the environment is available.
+6. Keep USB Serial/JTAG as the primary application console so D6/D7 remain available to a product UART; document that ROM boot output may still use UART0.
+7. Run structural validation before installing or building dependencies.
+8. Run full firmware and documentation validation when the environment is available.
 
 ## Validate
 
@@ -70,6 +71,7 @@ Require these outcomes:
 - `mkdocs build --strict` succeeds.
 - On Apple Silicon, PlatformIO reports `darwin_arm64` and both cross-compilers are Mach-O arm64 executables.
 - When a matching board is physically connected and the user explicitly requests flashing, the serial log reports `XIAO_RUNTIME_READY version=1` and at least ten monotonically increasing heartbeats. A successful upload alone is not a runtime acceptance result.
+- Firmware delivery packages contain the application, bootloader, partition table, flash arguments, manifest, and SHA-256 checksums; reject an application image above 768 KiB for the template's 1 MiB app partition.
 
 ## Maintain documentation
 
@@ -116,6 +118,7 @@ Prefer an atomic move on the same filesystem so recovery remains possible from t
 - Store generated per-environment `sdkconfig` files inside `.pio/`, never at the repository root.
 - Set `PROJECT_VER` explicitly so an empty Git repository can build.
 - Do not flash, erase, publish, commit, push, or create a release unless the user requests it.
+- Treat `scripts/verify_hardware.py --flash` as a hardware-writing operation. Without `--flash`, the script may reset and read the selected device but must not write persistent state.
 - Verify actual board variants before applying S3 Sense or Plus camera, microSD, LED, or extra-pin mappings.
 - Keep build and documentation generation non-destructive by default. Require an explicit user request before any hardware-writing MCP or command performs flash or erase operations.
 - Do not mix PlatformIO-managed ESP-IDF with an independently installed native ESP-IDF toolchain silently. Use the project's PlatformIO environment unless the user explicitly selects a native EIM/ESP-IDF workflow.

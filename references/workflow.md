@@ -5,14 +5,14 @@
 The bundled template is verified with:
 
 - PlatformIO Core 6.1.19
-- `platformio/espressif32@7.0.0`
-- ESP-IDF 6.0.0
-- MkDocs 1.6.x and Material 9.7.x
+- `platformio/espressif32@7.0.1`
+- ESP-IDF 6.0.1
+- MkDocs 1.6.1 and Material 9.7.7
 - Apple Silicon `darwin_arm64`
 
-Verified on 2026-07-18. At that time Espressif had a newer ESP-IDF 6.0.x patch
-release, while PlatformIO Espressif32 7.0.0 officially integrated ESP-IDF
-6.0.0. This template chooses the newest officially integrated PlatformIO pair
+Verified on 2026-07-18. At that time Espressif had released ESP-IDF 6.0.2,
+while PlatformIO Espressif32 7.0.1 officially integrated ESP-IDF 6.0.1.
+This template chooses the newest officially integrated PlatformIO pair
 instead of overriding only the framework package. Recheck both official release
 pages whenever creating a long-lived project or deliberately updating the
 template.
@@ -42,6 +42,9 @@ sdkconfig.flash-4mb      C3/C6 Flash override
 sdkconfig.xiao-esp32s3   S3 Flash and PSRAM override
 mkdocs.yml               Documentation navigation and theme
 requirements-docs.txt    Documentation dependencies
+requirements-dev.txt     Pinned PlatformIO and serial automation dependencies
+scripts/                 Firmware packaging and hardware validation
+tests/                   Host-side automation tests
 ```
 
 Add reusable drivers under `components/<device>/` with public headers in `components/<device>/include/`.
@@ -52,6 +55,10 @@ Add reusable drivers under `components/<device>/` with public headers in `compon
 pio run -e xiao_esp32c3
 pio run -e xiao_esp32s3
 pio run -e xiao_esp32c6
+
+python3 scripts/package_firmware.py --environment xiao_esp32c3
+python3 scripts/package_firmware.py --environment xiao_esp32s3
+python3 scripts/package_firmware.py --environment xiao_esp32c6
 
 pio run -e xiao_esp32c3 -t upload
 pio device list
@@ -91,6 +98,15 @@ file ~/.platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-gcc
 file ~/.platformio/packages/toolchain-xtensa-esp-elf/bin/xtensa-esp-elf-gcc
 ```
 
+For an attached board, run the guarded verifier. Keep `--flash` explicit because it overwrites the current firmware:
+
+```bash
+python3 scripts/verify_hardware.py \
+  --environment xiao_esp32s3 \
+  --port auto \
+  --heartbeats 10
+```
+
 Require `arm64`, `darwin_arm64`, and Mach-O arm64. Cross-compilers still produce Xtensa/RISC-V firmware; the `file` check describes the host executable.
 
 ## Pin cautions
@@ -103,6 +119,6 @@ Require `arm64`, `darwin_arm64`, and Mach-O arm64. Cross-compilers still produce
 
 ## CI
 
-Firmware CI builds all three environments and uploads `.bin` plus `flash_args`. Documentation CI runs `mkdocs build --strict` for pull requests and deploys GitHub Pages on `main`.
+Firmware CI first runs host-side tests, builds all three environments, then creates a delivery directory for each environment containing firmware, bootloader, partition table, flash arguments, `manifest.json`, and `SHA256SUMS`. The template rejects `firmware.bin` above 768 KiB. GitHub Actions are pinned to immutable release SHAs and updated through Dependabot. Documentation CI runs `mkdocs build --strict` for pull requests and deploys GitHub Pages on `main`.
 
 Do not publish releases automatically unless requested. A release should include firmware, bootloader, partitions, flash arguments, checksums, board variant, PlatformIO platform version, and upgrade notes.

@@ -7,7 +7,7 @@
 | TX | D6 | 21 / 43 / 16 |
 | RX | D7 | 20 / 44 / 17 |
 
-C3 的 D6/GPIO21 会输出启动日志；外设若在复位期间驱动该线路，应评估冲突。S3 的 D6/D7 是常用 UART 引脚，但控制台也可能通过 USB 路径工作，仍需核对项目的 console 配置。
+本模板将 ESP-IDF 应用控制台固定到 USB Serial/JTAG，因此 D6/D7 可由 `UART_NUM_1` 使用。芯片 ROM 在 ESP-IDF bootloader 接管前仍可能短暂通过 UART0 输出启动字节；外设若会主动驱动 RX、对启动字节敏感或与 UART0 共用内部资源，仍需评估上电时序。不要通过烧写 eFuse 隐藏日志。
 
 ## 初始化示例
 
@@ -54,6 +54,6 @@ UART 只定义字节传输。外设页还必须定义：
 1. 先做本机 TX/RX 回环。
 2. 再连接外设并捕获原始十六进制帧。
 3. 验证断电、半帧、错误 CRC、超时和重连。
-4. 确认日志控制台没有与业务 UART 共用同一端口/引脚。
+4. 在生成的 sdkconfig 中确认 `CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG` 已启用且 `CONFIG_ESP_CONSOLE_UART` 未启用。
 
 官方参考：[ESP-IDF UART](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/uart.html)。最近核对：2026-07-18。

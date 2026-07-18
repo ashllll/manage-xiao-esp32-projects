@@ -1,4 +1,7 @@
-CONFIG_ESP_CONSOLE_UART_BAUDRATE=115200
+# Keep the application console on the on-chip USB Serial/JTAG controller so
+# XIAO D6/D7 remain available to a product UART. ROM boot output may still use
+# UART0 until the ESP-IDF bootloader takes control.
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+CONFIG_ESP_CONSOLE_SECONDARY_NONE=y
 CONFIG_LOG_DEFAULT_LEVEL_INFO=y
 CONFIG_COMPILER_OPTIMIZATION_SIZE=y
-

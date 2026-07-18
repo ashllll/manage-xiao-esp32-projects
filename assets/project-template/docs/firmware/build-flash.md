@@ -53,6 +53,23 @@ pio device monitor -b 115200
 
 若板型或资源不匹配，自检会在 READY 标志之前失败。此时应修正 `-e` 环境或确认板卡变体，不要删除自检绕过问题。
 
+推荐使用可复用脚本完成同一套检查：
+
+```bash
+python3 scripts/verify_hardware.py \
+  --environment xiao_esp32s3 --port auto --heartbeats 10
+```
+
+默认只复位并读取串口。只有添加 `--flash` 才会调用 PlatformIO 写入固件；多块 Espressif 设备同时连接时必须显式提供 `--port`。
+
+## 固件交付包
+
+```bash
+python3 scripts/package_firmware.py --environment xiao_esp32s3
+```
+
+输出到 `dist/<environment>/`，包含应用、bootloader、分区表、flash 参数、`manifest.json` 和 `SHA256SUMS`。应用固件超过 768 KiB 时打包失败，为 1 MiB 应用分区保留升级空间。
+
 如果设备没有进入下载模式，按住 BOOT、短按 RESET，然后松开 BOOT 再重试。端口不稳定时，可在对应环境中显式配置 `upload_port` 和 `monitor_port`，但不要把个人机器的端口提交到共享模板。
 
 ## 擦除与恢复
