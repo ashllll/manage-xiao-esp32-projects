@@ -1,0 +1,22 @@
+name: gates
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout (token auth, no JS action)
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git init -q .
+          git remote add origin "http://llll:${TOKEN}@192.168.20.193:3000/llll/manage-xiao-esp32-projects.git"
+          git fetch -q --depth 1 origin "$GITHUB_SHA"
+          git checkout -q FETCH_HEAD
+      - name: Baseline preflight
+        run: ./scripts/preflight.sh
