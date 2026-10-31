@@ -19,4 +19,4 @@ jobs:
           git fetch -q --depth 1 origin "$GITHUB_SHA"
           git checkout -q FETCH_HEAD
       - name: Baseline preflight
-        run: ./scripts/preflight.sh
+        run: bash scripts/preflight.sh
